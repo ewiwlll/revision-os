@@ -24,7 +24,8 @@ Pour un cours de 90 minutes, vous obtenez :
 - **`plan.json`** — le découpage du cours en sections, chacune avec son résumé, ses notions et **ses timecodes réels** ;
 - **`fiche.md`** — la fiche de révision : par section, une prose d'entrée, des puces `- **Notion** : explication`, une phrase de sortie ;
 - **`questions.json`** — des questions type contrôle continu (≈ 6 pour 1000 mots de fiche), avec leurs réponses ;
-- **`cards.json`** + **`export.apkg`** — les cartes recto/verso, prêtes pour Anki.
+- **`cards.json`** + **`export.apkg`** — **les mêmes questions en cartes** (une carte par question :
+  recto = l'énoncé, verso = la réponse, plus les tags thème/priorité), prêtes pour Anki.
 
 ## Démarrage rapide
 

@@ -26,7 +26,8 @@ For a 90-minute lecture:
 - **`plan.json`** — the lecture split into sections, each with a summary, key notions and **real timecodes**;
 - **`fiche.md`** — the study sheet: per section, a short intro paragraph, `- **Key notion**: explanation` bullets, a closing sentence;
 - **`questions.json`** — exam-style questions (≈ 6 per 1000 words of sheet), with answers;
-- **`cards.json`** + **`export.apkg`** — front/back flashcards, ready for Anki.
+- **`cards.json`** + **`export.apkg`** — **the same questions as flashcards** (one card per question:
+  front = the question, back = the answer, plus theme/priority tags), ready for Anki.
 
 ## Quickstart
 

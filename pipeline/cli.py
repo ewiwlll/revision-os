@@ -200,7 +200,7 @@ def cmd_generate(args: argparse.Namespace) -> int:
     result = run_generate(transcript_md=transcript, plan=plan, out_dir=args.outdir,
                           api_key=cfg.openrouter_api_key, model=cfg.gen_model,
                           effort=cfg.reasoning_effort, ledger=ledger, images=images)
-    print("✅ {} — fiche {} mots, {} question(s), {} carte(s)".format(
+    print("✅ {} — fiche {} mots, {} question(s) → {} carte(s) (1 carte par question)".format(
         result["out_dir"], result["fiche_words"], result["questions"], result["cards"]))
     return 0
 
