@@ -45,6 +45,7 @@ revision-pipeline ingest --audio amphi-12.m4a --out out/transcript.md --title "M
 revision-pipeline plan --transcript out/transcript.md --out out/plan.json
 
 # 3. Plan + transcription → fiche, questions, cartes
+#    (ajoutez --lang en pour traduire la sortie ; sinon tout suit la langue du cours)
 revision-pipeline generate --transcript out/transcript.md --plan out/plan.json --outdir out
 
 # 4. Cartes → deck Anki
@@ -112,6 +113,9 @@ Les modèles se changent par variable d'environnement (`TRANSCRIBE_MODEL`, `GEN_
   toutes les sections, et refuse les questions administratives (celui qui pose « quel est le barème
   du TD ? » ne révise pas son cours).
 - **Journal de coûts** : impossible de se ruiner par accident quand chaque appel est chiffré.
+- **Langue** : la transcription est faite **dans la langue réellement parlée** (jamais traduite), et la
+  fiche/questions la suivent par défaut. `--lang en` (ou `fr`, `es`…) traduit la sortie en gardant les
+  termes techniques du cours, avec la traduction entre parenthèses à la première occurrence.
 - **Formats de sortie standards** : Markdown (Obsidian), JSON (retraitement), `.apkg` (Anki).
 
 ## Ce qui n'est pas dans ce dépôt
@@ -125,7 +129,9 @@ produit ; ici, c'est le moteur. Le MCP est livré avec, dans deux modes : local 
 - La qualité dépend de l'audio : un amphi bruité produit plus d'erreurs, surtout sur les noms
   propres et le vocabulaire scientifique rare.
 - 90 minutes d'audio ≈ 5 à 15 minutes de traitement (transcription parallélisée + LLM).
-- Les prompts sont en **français** (cours francophones) — à traduire pour d'autres langues.
+- La *rédaction* des prompts est en français et le pipeline a été calibré sur des cours francophones ;
+  la langue de transcription et la langue de sortie sont configurables (`--lang`), mais les autres
+  langues sont moins éprouvées.
 - Tests : `selftest` + un exemple fourni pour l'instant ; les tests unitaires arrivent au fur et à
   mesure (je développe ce dépôt pendant ma L1, pas à plein temps).
 - Ça coûte ~0,30 $ par cours de 90 min : ce n'est pas gratuit, mais c'est le prix des modèles, pas

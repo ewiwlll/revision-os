@@ -137,9 +137,11 @@ def deposer_fichier(cours: str, chemin: str) -> str:
 
 
 @mcp.tool()
-def lancer_generation(cours: str, sujet: str = "", date: str = "") -> str:
+def lancer_generation(cours: str, sujet: str = "", date: str = "", langue: str = "") -> str:
     """Lance la chaîne transcription → plan → fiche/questions/cartes en arrière-plan.
 
+    `langue` (ex. "en") traduit la fiche et les questions dans cette langue ; par défaut,
+    tout suit la langue du cours (la transcription fait foi).
     Le journal est écrit dans <cours>/work/run.log ; suis l'avancement avec detail_cours.
     Compte ~1 min de traitement par 10 min d'audio (plus quelques minutes de LLM).
     """
@@ -153,11 +155,12 @@ def lancer_generation(cours: str, sujet: str = "", date: str = "") -> str:
     log = d / "work" / "run.log"
     log.parent.mkdir(exist_ok=True)
     cli = [sys.executable, "-m", "pipeline.cli"]
+    lang = ["--lang", langue] if langue else []
     cmds = [
         cli + ["ingest", "--audio", str(audio), "--out", str(out / "transcript.md"), "--title", sujet or d.name]
         + (["--date", date] if date else []),
-        cli + ["plan", "--transcript", str(out / "transcript.md"), "--out", str(out / "plan.json"), "--title", sujet or d.name],
-        cli + ["generate", "--transcript", str(out / "transcript.md"), "--plan", str(out / "plan.json"), "--outdir", str(out)],
+        cli + ["plan", "--transcript", str(out / "transcript.md"), "--out", str(out / "plan.json"), "--title", sujet or d.name] + lang,
+        cli + ["generate", "--transcript", str(out / "transcript.md"), "--plan", str(out / "plan.json"), "--outdir", str(out)] + lang,
     ]
     script = " && ".join(" ".join(shlex.quote(part) for part in cmd) for cmd in cmds)
     with log.open("ab") as fh:

@@ -47,6 +47,7 @@ revision-pipeline ingest --audio lecture-12.m4a --out out/transcript.md --title 
 revision-pipeline plan --transcript out/transcript.md --out out/plan.json
 
 # 3. Outline + transcript → sheet, questions, flashcards
+#    (add --lang en to translate the output; without it, everything follows the lecture's language)
 revision-pipeline generate --transcript out/transcript.md --plan out/plan.json --outdir out
 
 # 4. Flashcards → Anki deck
@@ -113,6 +114,9 @@ environment variables (`TRANSCRIBE_MODEL`, `GEN_MODEL`).
 - **Audit gates**: the generator checks the questions-per-1000-words ratio, that every section is
   covered, and rejects administrative questions (“what's the grading scheme?” is not revision).
 - **A cost ledger**: every call is priced, so a lecture can't silently cost a fortune.
+- **Language**: the transcript is transcribed **in the language actually spoken** (never translated), and
+  the sheet/questions follow it by default. `--lang en` (or `fr`, `es`…) translates the output while
+  keeping the lecture's technical terms, with a translation in parentheses on first use.
 - **Standard output formats**: Markdown (Obsidian), JSON (reprocessing), `.apkg` (Anki).
 
 ## What is *not* in this repository
@@ -126,7 +130,8 @@ product. This repo is the engine. The MCP ships with it in two modes: local (thi
 - Output quality tracks audio quality: a noisy lecture hall means more errors, especially on proper
   nouns and rare scientific vocabulary.
 - 90 minutes of audio ≈ 5–15 minutes of processing (parallel transcription + LLM calls).
-- Prompts are in **French** (French-language lectures) — translate them for other languages.
+- Prompt *wording* is in French, and the pipeline was tuned on French lectures; the transcript and the
+  output language are configurable (`--lang`), but other languages are less battle-tested.
 - Tests: `selftest` plus the bundled example for now; unit tests are coming as the repo grows
   (I maintain this during my first year of university, not full-time).
 - It is not free: ~$0.30 per 90-minute lecture — that's the model cost, not a subscription.

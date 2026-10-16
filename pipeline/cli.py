@@ -177,7 +177,7 @@ def cmd_plan(args: argparse.Namespace) -> int:
     ledger = UsageLedger(cfg.work_dir / "usage.jsonl")
     plan = build_plan(transcript_md=transcript, api_key=cfg.openrouter_api_key,
                       model=cfg.gen_model, title=args.title, subject=args.subject,
-                      effort=cfg.reasoning_effort, ledger=ledger)
+                      output_language=args.lang, effort=cfg.reasoning_effort, ledger=ledger)
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     out.write_text(json.dumps(plan, ensure_ascii=False, indent=2), encoding="utf-8")
@@ -199,6 +199,7 @@ def cmd_generate(args: argparse.Namespace) -> int:
     ledger = UsageLedger(cfg.work_dir / "usage.jsonl")
     result = run_generate(transcript_md=transcript, plan=plan, out_dir=args.outdir,
                           api_key=cfg.openrouter_api_key, model=cfg.gen_model,
+                          output_language=args.lang,
                           effort=cfg.reasoning_effort, ledger=ledger, images=images)
     print("✅ {} — fiche {} mots, {} question(s) → {} carte(s) (1 carte par question)".format(
         result["out_dir"], result["fiche_words"], result["questions"], result["cards"]))
@@ -265,6 +266,7 @@ def main(argv=None) -> int:
     p.add_argument("--title")
     p.add_argument("--subject")
     p.add_argument("--model")
+    p.add_argument("--lang", help="langue de sortie (fr, en, anglais…) — défaut : langue du cours")
     p.set_defaults(func=cmd_plan)
 
     p = sub.add_parser("export", help="cards.json → deck Anki .apkg")
@@ -279,6 +281,7 @@ def main(argv=None) -> int:
     p.add_argument("--plan", required=True)
     p.add_argument("--outdir", required=True)
     p.add_argument("--model")
+    p.add_argument("--lang", help="langue de sortie (fr, en, anglais…) — défaut : langue du cours")
     p.add_argument("--images", help="manifest.json des images de diaporama (illustrations optionnelles)")
     p.set_defaults(func=cmd_generate)
 

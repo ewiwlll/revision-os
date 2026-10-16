@@ -9,6 +9,26 @@ from __future__ import annotations
 from .text import format_time
 
 
+_LANG_NAMES = {"fr": "français", "en": "anglais", "es": "espagnol", "de": "allemand", "it": "italien",
+               "pt": "portugais", "nl": "néerlandais", "zh": "chinois", "ar": "arabe"}
+
+
+def language_instruction(output_language: str | None) -> str:
+    """Instruction injectée quand on veut une langue de sortie différente de celle du cours.
+
+    Par défaut (None) : on suit la langue de l'audio — c'est la transcription qui fait foi.
+    """
+    if not output_language:
+        return ""
+    lang = _LANG_NAMES.get(output_language.strip().lower(), output_language.strip())
+    return (
+        "\n\nLangue de rédaction : {lang}. Traduis la prose, mais GARDE les termes techniques du "
+        "cours tels qu'ils ont été prononcés, en ajoutant la traduction entre parenthèses à la "
+        "première occurrence. Traduis aussi les intitulés de structure (Objectifs, Infos pratiques…). "
+        "Les citations du professeur restent dans leur langue d'origine.".format(lang=lang)
+    )
+
+
 def build_transcription_prompt(*, label: str, start_sec: float, end_sec: float, total_sec: float,
                                title: str, subject: str | None = None, date_fr: str | None = None,
                                teacher: str | None = None, lexicon: str | None = None) -> str:
@@ -23,12 +43,12 @@ def build_transcription_prompt(*, label: str, start_sec: float, end_sec: float, 
         context.append("Enseignant : {}.".format(teacher))
 
     base = (
-        "Tu transcris un enregistrement de cours universitaire en français.\n"
+        "Tu transcris un enregistrement de cours universitaire.\n"
         + ("\n".join(context) + "\n" if context else "")
         + "Segment : {label}, créneau ABSOLU [{start} -> {end}] d'un enregistrement de {total}.\n"
         "\n"
         "CONSIGNES STRICTES :\n"
-        "1. Transcription mot-à-mot intégrale en français : chaque phrase, chaque explication dictée "
+        "1. Transcription mot-à-mot intégrale DANS LA LANGUE D'ORIGINE, sans jamais traduire : chaque "
         "ou écrite au tableau, chaque définition, formule, valeur numérique, unité et exemple, les "
         "anecdotes et digressions de l'enseignant (elles contiennent les pièges et les "
         "mnémotechniques), ainsi que les questions d'étudiants identifiables "

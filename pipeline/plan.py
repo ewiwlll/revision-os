@@ -9,6 +9,7 @@ import re
 
 from .errors import IngestionError
 from .llm import chat, parse_json
+from .prompt import language_instruction
 from .text import format_time
 from .usage import prices_for, usage_entry
 
@@ -135,7 +136,7 @@ def _fix_timecodes(plan: dict, transcript: str) -> dict:
     return out
 
 
-def build_plan(*, transcript_md: str, api_key: str, model: str, title: str | None = None,
+def build_plan(*, transcript_md: str, api_key: str, model: str, output_language: str | None = None, title: str | None = None,
                subject: str | None = None, effort: str = "medium", ledger=None, log=print) -> dict:
     """Construit le plan du cours à partir de la transcription. Retourne le plan validé."""
     context = []
@@ -146,6 +147,7 @@ def build_plan(*, transcript_md: str, api_key: str, model: str, title: str | Non
     user = (
         ("\n".join(context) + "\n\n" if context else "")
         + "Transcription du cours :\n\n<transcription>\n" + transcript_md + "\n</transcription>\n\n"
+        + language_instruction(output_language) + "\n"
         "Produis UNIQUEMENT un objet JSON valide, sans texte autour, de la forme exacte :\n"
         '{\n'
         '  "titre": "titre du cours (affiné si utile)",\n'

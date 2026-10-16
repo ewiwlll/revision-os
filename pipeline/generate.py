@@ -16,6 +16,7 @@ import re
 from pathlib import Path
 
 from .errors import IngestionError
+from .prompt import language_instruction
 from .llm import chat, parse_json
 from .text import count_words
 from .usage import prices_for, usage_entry
@@ -82,7 +83,7 @@ SUPPORT_RE = re.compile(
     re.IGNORECASE)
 
 
-def generate_fiche(*, transcript_md: str, plan: dict, api_key: str, model: str,
+def generate_fiche(*, transcript_md: str, plan: dict, api_key: str, model: str, output_language: str | None = None,
                    effort: str = "medium", ledger=None, log=print, images: list | None = None) -> str:
     img_block = ""
     if images:
@@ -104,7 +105,7 @@ def generate_fiche(*, transcript_md: str, plan: dict, api_key: str, model: str,
         + "\n</transcription>\n\n"
         "Rédige la fiche de révision complète en Markdown (pas de bloc de code autour), en suivant "
         "la structure imposée et les sections du plan dans l'ordre. Chaque section garde un volume "
-        "proportionné à son temps de cours." + img_block
+        "proportionné à son temps de cours." + img_block + language_instruction(output_language)
     )
     text, usage = chat(api_key, model, [{"role": "system", "content": FICHE_SYSTEM},
                                         {"role": "user", "content": user}], effort=effort, log=log)
@@ -114,7 +115,7 @@ def generate_fiche(*, transcript_md: str, plan: dict, api_key: str, model: str,
     return text.strip() + "\n"
 
 
-def generate_questions(*, fiche_md: str, transcript_md: str, plan: dict, api_key: str, model: str,
+def generate_questions(*, fiche_md: str, transcript_md: str, plan: dict, api_key: str, model: str, output_language: str | None = None,
                        effort: str = "medium", ledger=None, log=print) -> list[dict]:
     words = count_words(fiche_md)
     target = max(6, round(6 * words / 1000))   # proportionnel au cours — plus de plafond à 20
@@ -140,6 +141,7 @@ def generate_questions(*, fiche_md: str, transcript_md: str, plan: dict, api_key
             '"enonce": "question en copie fermée", "reponse": "réponse scannable", "priorite": "S"}]}\n'
             "Contraintes : thèmes courts en majuscules ; titres brefs ; énoncés autonomes sans mention "
             "du support ; réponses au format puces à mot-clé en gras."
+            + language_instruction(output_language)
         )
         text, usage = chat(api_key, model, [{"role": "system", "content": QUESTIONS_SYSTEM},
                                             {"role": "user", "content": user}], effort=effort, log=log)
@@ -227,7 +229,7 @@ def audit_outputs(*, fiche_md: str, questions: list[dict], plan: dict) -> dict:
     return {"hard": hard, "warn": warn}
 
 
-def run_generate(*, transcript_md: str, plan: dict, out_dir, api_key: str, model: str,
+def run_generate(*, transcript_md: str, plan: dict, out_dir, api_key: str, model: str, output_language: str | None = None,
                  effort: str = "medium", ledger=None, log=print, images: list | None = None) -> dict:
     """Génère fiche + questions + cartes, écrit les artefacts, puis applique les audits v0.
 
@@ -238,14 +240,16 @@ def run_generate(*, transcript_md: str, plan: dict, out_dir, api_key: str, model
 
     log("Génération de la fiche…")
     fiche = generate_fiche(transcript_md=transcript_md, plan=plan, api_key=api_key, model=model,
-                           effort=effort, ledger=ledger, log=log, images=images)
+                           output_language=output_language, effort=effort, ledger=ledger, log=log,
+                           images=images)
     fiche_words = count_words(fiche)
     (out_dir / "fiche.md").write_text(fiche, encoding="utf-8")
     log("Fiche : {} mots".format(fiche_words))
 
     log("Génération des questions…")
     questions = generate_questions(fiche_md=fiche, transcript_md=transcript_md, plan=plan,
-                                   api_key=api_key, model=model, effort=effort, ledger=ledger, log=log)
+                                   api_key=api_key, model=model, output_language=output_language,
+                                   effort=effort, ledger=ledger, log=log)
     (out_dir / "questions.json").write_text(
         json.dumps({"questions": questions}, ensure_ascii=False, indent=2), encoding="utf-8")
     log("Questions : {}".format(len(questions)))
