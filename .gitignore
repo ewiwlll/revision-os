@@ -1,0 +1,29 @@
+# Secrets & environnements locaux — JAMAIS commités
+.env
+.env.*
+*.key
+secrets/
+
+# Espaces de travail (audios, transcriptions, fiches, cartes : contenu personnel)
+workspace/
+work/
+out/
+*.apkg
+*.m4a
+*.mp3
+*.wav
+*.pdf
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+dist/
+build/
+*.egg-info/
+
+# macOS / éditeurs
+.DS_Store
+.idea/
+.vscode/
